@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "hydrogen-team"
 version = "0.1.0"
-description = "Open-source multi-agent collaboration studio powered by Google Gemini 4 Hydrogen & Google ADK."
+description = "Open-source multi-agent collaboration studio powered by Google Gemini 4 Hydrogen & Google ADK — Peer Mesh, Rank-Up Orchestration & Code-First Video VFX."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"

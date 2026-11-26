@@ -1,13 +1,32 @@
 # Hydrogen Team
 
-**Open-source multi-agent collaboration studio built on Google Gemini 4 Hydrogen (`gemini-4-hydrogen`) and Google ADK.**
+**Open-source multi-agent collaboration studio powered by Google Gemini 4 Hydrogen (`gemini-4-hydrogen`) and Google ADK — Peer Mesh, Rank-Up Orchestration & Code-First Video VFX.**
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-38bdf8.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776ab.svg)](pyproject.toml)
 [![Google ADK](https://img.shields.io/badge/Google_ADK-2.15%2B-a78bfa.svg)](https://google.github.io/adk-docs/)
 [![Vertex AI](https://img.shields.io/badge/Auth-GCP_Vertex_AI_ADC-34d399.svg)](#quick-start-zero-api-key)
 
-Hydrogen Team demonstrates what happens when fast, cost-efficient **Gemini 4 Hydrogen** agents work together — either in a **decentralized Peer-to-Peer Mesh (no orchestrator)** or led by a **higher-rank Gemini 4 orchestrator (`Neon`, `Argon`, or `Carbon`)** — solving real-world problems with live visible thinking traces, peer-to-peer blackboard collaboration, code execution, financial modeling, and **code-first MP4 video & VFX rendering with zero After Effects or Premiere**.
+Hydrogen Team demonstrates what happens when fast, cost-efficient **Gemini 4 Hydrogen** agents collaborate in real time — either in a **decentralized Peer-to-Peer Mesh (no orchestrator)** or led by a **higher-rank Gemini 4 orchestrator (`Neon`, `Argon`, or `Carbon`)** — solving coding, business monetization, deep research, trip planning, product launch, and **code-first MP4 video & VFX rendering tasks (zero After Effects or Premiere)** with visible Gemini 4 thinking traces and live artifact previews.
+
+---
+
+## Mission Control UI Screenshots
+
+### Pure Hydrogen Peer Mesh (`video_vfx` Live Run Telemetry & Thinking Traces)
+![Hydrogen Team Peer Mesh Mission Control](docs/images/mission-control-peer-mesh.png)
+
+### Code-First Video & VFX Preview (Python + Pillow + FFmpeg MP4 Render)
+![Code-First Video & VFX Deliverables Preview](docs/images/deliverables-video-preview.png)
+
+### Shared Team Blackboard & Orchestrated Rank-Up Topology
+
+| Shared Team Blackboard (Peer Proposals & Handoffs) | Orchestrated Rank-Up (`Argon` Lead + `Hydrogen` Squad) |
+| :---: | :---: |
+| ![Shared Team Blackboard](docs/images/team-blackboard.png) | ![Orchestrated Rank-Up Topology](docs/images/mission-control-orchestrated.png) |
+
+### Zero-Key GCP Vertex AI Auth & Gemini 4 Periodic Table Diagnostics
+![GCP Vertex AI Auth and Gemini 4 Model Matrix](docs/images/model-matrix-doctor.png)
 
 ---
 
@@ -105,8 +124,8 @@ Hydrogen Team automatically detects your **Google Cloud Application Default Cred
 ### 1. Install & Build
 
 ```bash
-git clone https://github.com/your-org/hydrogen-team.git
-cd hydrogen-team
+git clone https://github.com/devenes/gemini-hydrogen-team.git
+cd gemini-hydrogen-team
 
 # Create virtual environment and install Hydrogen Team
 uv venv --python 3.13 .venv
