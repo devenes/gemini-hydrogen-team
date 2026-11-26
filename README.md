@@ -239,3 +239,9 @@ Contributions are warmly welcomed — especially new scenarios, prompt templates
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
+
+---
+
+<p align="center">
+  <sub>Built on <strong>Google Antigravity</strong> · Powered by <strong>Gemini 4 Hydrogen</strong>, <strong>Google ADK</strong>, and <strong>Google Cloud Vertex AI</strong> · Apache 2.0 Open Source</sub>
+</p>

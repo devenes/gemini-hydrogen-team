@@ -565,6 +565,15 @@ export default function App() {
           onClose={() => setSquadOpen(false)}
         />
       )}
+
+      <footer className="app-footer">
+        <span>
+          Built on <strong>Google Antigravity</strong> · Powered by{" "}
+          <strong>Gemini 4 Hydrogen</strong>, <strong>Google ADK</strong> &amp;{" "}
+          <strong>Google Cloud Vertex AI</strong>
+        </span>
+        <span>Open Source · Apache 2.0</span>
+      </footer>
     </div>
   );
 }
