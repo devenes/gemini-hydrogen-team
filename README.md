@@ -1,3 +1,5 @@
+![Hydrogen Team Multi-Agent Architecture Cover](docs/images/hydrogen-team-agent-architecture.jpg)
+
 # Hydrogen Team
 
 **Open-source multi-agent collaboration studio powered by Google Gemini 4 Hydrogen (`gemini-4-hydrogen`) and Google ADK — Peer Mesh, Rank-Up Orchestration & Code-First Video VFX.**
