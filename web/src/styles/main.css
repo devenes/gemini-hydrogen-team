@@ -1175,3 +1175,26 @@ dialog::backdrop {
   align-items: center;
   gap: 10px;
 }
+
+.banner-error {
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--accent-danger) 16%, var(--bg-surface));
+  border: 1px solid color-mix(in oklab, var(--accent-danger) 55%, transparent);
+  color: var(--text-primary);
+  font-size: 12.5px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.banner-error svg {
+  color: var(--accent-danger);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.banner-error-body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

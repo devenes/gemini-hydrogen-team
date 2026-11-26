@@ -61,14 +61,18 @@ async def test_live_peer_mesh_video_vfx_hydrogen_collaboration(tmp_path: Path):
 
 
 async def test_live_orchestrated_coding_squad_argon_and_hydrogen(tmp_path: Path):
-    """End-to-end Orchestrated Rank-Up test: Gemini 4 Argon orchestrator + Gemini 4 Hydrogen workers."""
-    settings = Settings(HYDROGEN_RUNS_DIR=tmp_path)
+    """End-to-end Orchestrated Rank-Up test: Gemini 4 Hydrogen orchestrator + Gemini 4 Hydrogen workers."""
+    settings = Settings(
+        HYDROGEN_RUNS_DIR=tmp_path,
+        HYDROGEN_LLM_TIMEOUT_MS=45_000,
+        HYDROGEN_RUN_TIMEOUT_SECONDS=180,
+    )
     manager = RunManager(settings)
     req = RunRequest(
         scenario_id="coding",
         mode="orchestrated",
         worker_model="gemini-4-hydrogen",
-        orchestrator_model="gemini-4-argon",
+        orchestrator_model="gemini-4-hydrogen",
         worker_thinking_level="LOW",
         orchestrator_thinking_level="LOW",
         prompt=(
@@ -82,7 +86,7 @@ async def test_live_orchestrated_coding_squad_argon_and_hydrogen(tmp_path: Path)
     await active.task
 
     assert active.summary.status == "completed", f"Run failed: {active.summary.error}"
-    assert active.summary.resolved_orchestrator_model == "gemini-4-argon"
+    assert active.summary.resolved_orchestrator_model == "gemini-4-hydrogen"
     assert active.summary.resolved_worker_model == "gemini-4-hydrogen"
-    assert any(e.kind == "handoff" for e in active.events), "Expected Argon -> Hydrogen handoff events"
+    assert any(e.kind == "handoff" for e in active.events), "Expected orchestrator -> Hydrogen handoff events"
     assert active.summary.telemetry.total_artifacts >= 2

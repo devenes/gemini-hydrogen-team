@@ -25,7 +25,7 @@ from hydrogen_team.events import RunTelemetry, TeamEvent
 from hydrogen_team.models import resolve_model_with_fallback
 from hydrogen_team.scenarios import AgentBlueprint, CollaborationMode, get_scenario
 from hydrogen_team.tools import summarize_tool_result
-from hydrogen_team.topologies import build_team_topology
+from hydrogen_team.topologies import build_http_options, build_team_topology
 from hydrogen_team.workspace import ArtifactInfo, BlackboardEntry, RunWorkspace
 
 RunStatus = Literal["queued", "running", "completed", "failed", "cancelled"]
@@ -558,6 +558,7 @@ class RunManager:
                 workspace=workspace,
                 emit=run.emit,
                 telemetry=summary.telemetry,
+                llm_timeout_ms=self.settings.llm_timeout_ms,
                 custom_agents=request.custom_agents,
             )
             summary.roster = roster
@@ -602,9 +603,12 @@ class RunManager:
                 session_service=session_service,
                 plugins=[plugin],
             )
-            run_config = RunConfig(
-                max_llm_calls=self.settings.max_llm_calls,
-            )
+            run_config_kwargs: dict[str, Any] = {
+                "max_llm_calls": self.settings.max_llm_calls,
+            }
+            if "http_options" in RunConfig.model_fields:
+                run_config_kwargs["http_options"] = build_http_options(self.settings.llm_timeout_ms)
+            run_config = RunConfig(**run_config_kwargs)
 
             user_message = types.Content(
                 role="user",
@@ -621,7 +625,7 @@ class RunManager:
                 ],
             )
 
-            try:
+            async def _drain_runner() -> None:
                 async for _event in runner.run_async(
                     user_id="studio_user",
                     session_id=session.id,
@@ -629,6 +633,12 @@ class RunManager:
                     run_config=run_config,
                 ):
                     pass
+
+            try:
+                await asyncio.wait_for(
+                    _drain_runner(),
+                    timeout=self.settings.run_timeout_seconds,
+                )
             finally:
                 await runner.close()
 
@@ -660,9 +670,33 @@ class RunManager:
             summary.finished_at = time.time()
             summary.telemetry.finished_at = summary.finished_at
             raise
-        except Exception as exc:
+        except TimeoutError:
+            timeout_msg = (
+                f"Run exceeded overall timeout of {self.settings.run_timeout_seconds}s "
+                f"(HYDROGEN_RUN_TIMEOUT_SECONDS={self.settings.run_timeout_seconds})."
+            )
             summary.status = "failed"
-            summary.error = str(exc)
+            summary.error = timeout_msg
+            summary.finished_at = time.time()
+            summary.telemetry.finished_at = summary.finished_at
+            summary.telemetry.phase = "Timed Out"
+            for ag in summary.telemetry.agents.values():
+                if ag.status in {"thinking", "acting"}:
+                    ag.status = "error"
+                    ag.last_activity = "Timed out"
+            run.emit(
+                TeamEvent(
+                    run_id=summary.run_id,
+                    kind="error",
+                    agent="system",
+                    title=f"Mission timed out after {self.settings.run_timeout_seconds}s",
+                    content=timeout_msg,
+                )
+            )
+        except Exception as exc:
+            err_text = str(exc) or exc.__class__.__name__
+            summary.status = "failed"
+            summary.error = err_text
             summary.finished_at = time.time()
             summary.telemetry.finished_at = summary.finished_at
             summary.telemetry.phase = "Failed"
@@ -672,7 +706,7 @@ class RunManager:
                     kind="error",
                     agent="system",
                     title="Mission failed",
-                    content=str(exc),
+                    content=err_text,
                 )
             )
         finally:

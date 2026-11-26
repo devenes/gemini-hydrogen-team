@@ -55,6 +55,21 @@ flowchart LR
 2. **Orchestrated Rank-Up (`orchestrated`):** A higher-rank lead (`gemini-4-neon`, `gemini-4-argon`, `gemini-4-carbon`, or `gemini-4-hydrogen`) decomposes the objective and delegates via ADK `AgentTool` to Hydrogen specialists while streaming every nested sub-agent thought and tool call live through a custom ADK `BasePlugin`.
 3. **Assembly Pipeline + Critic Loop (`pipeline_loop`):** Sequential Hydrogen stages feeding into an ADK `LoopAgent` quality gate (`exit_loop`) where a critic reviews workspace artifacts and requests targeted refinements.
 
+For a deep dive into the routing, ADK topologies, telemetry plugin, timeout safeguards, and video pipeline, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+---
+
+## Timeout, Resilience & Fallback Safeguards
+
+Multi-agent runs involving nested `AgentTool` delegations, reasoning traces, and subprocess tool calls are protected at three layers so a stalled model call never hangs the UI or runner indefinitely:
+
+- **Per-Call HTTP Timeout & Retries (`HYDROGEN_LLM_TIMEOUT_MS=60000`):** Applied via `google.genai.types.HttpOptions(timeout=..., retry_options=HttpRetryOptions(attempts=2))` on `GenerateContentConfig` for both specialist `LlmAgent`s and `TeamOrchestrator` (so nested `AgentTool` calls enforce the same per-request deadline) as well as ADK `RunConfig`.
+- **Run-Level Deadline (`HYDROGEN_RUN_TIMEOUT_SECONDS=240`):** Wraps `Runner.run_async(...)` in `asyncio.wait_for(...)`. If exceeded, `RunManager` cleanly marks the run `failed`, emits an `error` `TeamEvent` and UI alert banner, persists `metadata.json`, and closes active SSE streams.
+- **LLM Call Cap & Subprocess Bounds:** `HYDROGEN_MAX_LLM_CALLS=40` caps total ADK model turns per run; `run_python_script` (5–90s) and `render_video_from_frames` (60s) enforce strict subprocess timeouts.
+- **Automatic Model Fallback:** Before launching a topology, `resolve_model_with_fallback()` live-probes the requested worker/orchestrator model (cached for 300s) and seamlessly falls back to `HYDROGEN_FALLBACK_MODEL` (`gemini-2.5-flash`) with a `fallback_notice` event if Gemini 4 is unavailable on the active project or API key.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for sequence diagrams and implementation details.
+
 ---
 
 ## Built-In Scenarios & Starter Templates
@@ -171,6 +186,7 @@ hydrogen-team/
 │   ├── server.py        # FastAPI REST + SSE streaming + artifact & video server
 │   └── cli.py           # Typer + Rich CLI (`doctor`, `scenarios`, `models`, `run`, `web`, `adk-web`)
 ├── adk_agents/          # Native Google ADK `adk web` / `adk run` compatibility
+├── docs/                # Technical architecture & Mermaid diagrams (ARCHITECTURE.md)
 ├── web/                 # Custom React + TypeScript Mission Control Web UI
 └── tests/               # Unit, API, security sandbox & live Vertex AI integration tests
 ```

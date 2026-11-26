@@ -117,6 +117,8 @@ class Settings(BaseSettings):
     host: str = Field(default="127.0.0.1", alias="HYDROGEN_HOST")
     port: int = Field(default=8042, alias="HYDROGEN_PORT")
     max_llm_calls: int = Field(default=40, alias="HYDROGEN_MAX_LLM_CALLS")
+    llm_timeout_ms: int = Field(default=60_000, alias="HYDROGEN_LLM_TIMEOUT_MS")
+    run_timeout_seconds: int = Field(default=240, alias="HYDROGEN_RUN_TIMEOUT_SECONDS")
 
     @property
     def resolved_project(self) -> str | None:

@@ -17,6 +17,14 @@ from hydrogen_team.tools import EventCallback, create_workspace_toolset
 from hydrogen_team.workspace import RunWorkspace
 
 
+def build_http_options(llm_timeout_ms: int = 60_000) -> types.HttpOptions:
+    """Build GenAI HTTP timeout and retry options shared by agents and ADK RunConfig."""
+    return types.HttpOptions(
+        timeout=llm_timeout_ms,
+        retry_options=types.HttpRetryOptions(attempts=2),
+    )
+
+
 def build_thinking_planner(
     model_id: str,
     thinking_level: str = "MEDIUM",
@@ -52,6 +60,7 @@ def _make_specialist_agent(
     default_thinking_level: str,
     workspace: RunWorkspace,
     emit: EventCallback,
+    llm_timeout_ms: int = 60_000,
     extra_instruction: str = "",
     name_override: str | None = None,
     extra_tools: list[Any] | None = None,
@@ -87,6 +96,7 @@ def _make_specialist_agent(
         planner=build_thinking_planner(model_id, level, include_thoughts=True),
         generate_content_config=types.GenerateContentConfig(
             temperature=0.45,
+            http_options=build_http_options(llm_timeout_ms),
         ),
     )
 
@@ -102,6 +112,7 @@ def build_team_topology(
     workspace: RunWorkspace,
     emit: EventCallback,
     telemetry: RunTelemetry,
+    llm_timeout_ms: int = 60_000,
     custom_agents: list[AgentBlueprint] | None = None,
 ) -> tuple[BaseAgent, list[dict[str, Any]]]:
     """Assemble the requested Google ADK multi-agent topology and return `(root_agent, roster_meta)`."""
@@ -158,6 +169,7 @@ def build_team_topology(
                 default_thinking_level=worker_thinking_level,
                 workspace=workspace,
                 emit=emit,
+                llm_timeout_ms=llm_timeout_ms,
                 extra_instruction=(
                     "You are being delegated a focused assignment by TeamOrchestrator. "
                     "Read the Team Blackboard first, execute your part completely (writing workspace files "
@@ -195,7 +207,10 @@ def build_team_topology(
             planner=build_thinking_planner(
                 orchestrator_model, orchestrator_thinking_level, include_thoughts=True
             ),
-            generate_content_config=types.GenerateContentConfig(temperature=0.35),
+            generate_content_config=types.GenerateContentConfig(
+                temperature=0.35,
+                http_options=build_http_options(llm_timeout_ms),
+            ),
         )
         return orchestrator, roster
 
@@ -230,6 +245,7 @@ def build_team_topology(
                     default_thinking_level=worker_thinking_level,
                     workspace=workspace,
                     emit=emit,
+                    llm_timeout_ms=llm_timeout_ms,
                     extra_instruction="You are collaborating directly as peers with no central orchestrator.",
                 )
                 for bp in blueprints
@@ -255,6 +271,7 @@ def build_team_topology(
                 default_thinking_level=worker_thinking_level,
                 workspace=workspace,
                 emit=emit,
+                llm_timeout_ms=llm_timeout_ms,
                 extra_instruction=(
                     "PHASE 1 (Peer Mesh — Parallel Discovery, No Orchestrator): "
                     "You are working concurrently alongside your peer Hydrogen agents. "
@@ -272,6 +289,7 @@ def build_team_topology(
                 default_thinking_level=worker_thinking_level,
                 workspace=workspace,
                 emit=emit,
+                llm_timeout_ms=llm_timeout_ms,
                 extra_instruction=(
                     "PHASE 2 (Peer Mesh — Cross-Pollination & Build, No Orchestrator): "
                     "First call `read_blackboard` and `list_workspace_files` to inspect what your peers created in Phase 1. "
@@ -338,6 +356,7 @@ def build_team_topology(
                 default_thinking_level=worker_thinking_level,
                 workspace=workspace,
                 emit=emit,
+                llm_timeout_ms=llm_timeout_ms,
                 extra_instruction="PIPELINE STAGE: Read the blackboard and build your stage artifacts cleanly for the next teammate.",
             )
             for bp in blueprints[:-2]
@@ -351,6 +370,7 @@ def build_team_topology(
             default_thinking_level=orchestrator_thinking_level if critic_model != worker_model else worker_thinking_level,
             workspace=workspace,
             emit=emit,
+            llm_timeout_ms=llm_timeout_ms,
             extra_tools=[exit_loop],
             extra_instruction=(
                 "QUALITY GATE LOOP: Inspect all workspace deliverables (`list_workspace_files`) and `read_blackboard`. "
@@ -365,6 +385,7 @@ def build_team_topology(
             default_thinking_level=worker_thinking_level,
             workspace=workspace,
             emit=emit,
+            llm_timeout_ms=llm_timeout_ms,
             extra_tools=[exit_loop],
             extra_instruction=(
                 "REFINEMENT & FINALIZATION STAGE: Read the critic's blackboard feedback, address every point in the "
@@ -387,6 +408,7 @@ def build_team_topology(
                 default_thinking_level=worker_thinking_level,
                 workspace=workspace,
                 emit=emit,
+                llm_timeout_ms=llm_timeout_ms,
             )
             for bp in blueprints
         ]

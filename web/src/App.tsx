@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, FileCode2, Pin, Terminal } from "lucide-react";
+import { AlertTriangle, FileCode2, Pin, Terminal, XCircle } from "lucide-react";
 import type {
   AgentBlueprint,
   ArtifactInfo,
@@ -435,6 +435,15 @@ export default function App() {
             <div className="banner-warning" role="status">
               <AlertTriangle size={16} aria-hidden="true" />
               <span>{activeRun.fallback_reason}</span>
+            </div>
+          )}
+
+          {activeRun?.status === "failed" && activeRun.error && (
+            <div className="banner-error" role="alert">
+              <XCircle size={16} aria-hidden="true" />
+              <div className="banner-error-body">
+                <strong>Run failed:</strong> <span>{activeRun.error}</span>
+              </div>
             </div>
           )}
 
