@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+
+# Node / Frontend
+web/node_modules/
+web/dist/
+src/hydrogen_team/static/
+
+# Runtime & secrets
+.env
+runs/
+*.log
+.DS_Store

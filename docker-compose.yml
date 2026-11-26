@@ -1,0 +1,16 @@
+services:
+  hydrogen-team:
+    build: .
+    ports:
+      - "8042:8042"
+    environment:
+      - GOOGLE_GENAI_USE_VERTEXAI=${GOOGLE_GENAI_USE_VERTEXAI:-TRUE}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-}
+      - GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-global}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - HYDROGEN_WORKER_MODEL=${HYDROGEN_WORKER_MODEL:-gemini-4-hydrogen}
+      - HYDROGEN_ORCHESTRATOR_MODEL=${HYDROGEN_ORCHESTRATOR_MODEL:-gemini-4-neon}
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+    volumes:
+      - ${HOME}/.config/gcloud:/root/.config/gcloud:ro
+      - ./runs:/app/runs
